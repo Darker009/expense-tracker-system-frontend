@@ -14,17 +14,14 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Handle form input changes
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Password validation
     if (user.password !== user.confirmPassword) {
       setError("Passwords do not match!");
       return;
@@ -39,7 +36,7 @@ function Register() {
       });
 
       alert(response.data.message || "Registration Successful! Please login.");
-      navigate("/login"); // Redirect to login page
+      navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Try again.");
     } finally {
@@ -53,11 +50,9 @@ function Register() {
         <div className="card p-4 shadow-lg">
           <h2 className="text-center mb-3">Register</h2>
 
-          {/* Display error message if exists */}
           {error && <p className="text-danger text-center">{error}</p>}
 
           <form onSubmit={handleSubmit}>
-            {/* Name Field */}
             <div className="mb-3">
               <label className="form-label">Name</label>
               <input
@@ -70,7 +65,6 @@ function Register() {
               />
             </div>
 
-            {/* Email Field */}
             <div className="mb-3">
               <label className="form-label">Email</label>
               <input
@@ -83,7 +77,6 @@ function Register() {
               />
             </div>
 
-            {/* Password Field */}
             <div className="mb-3">
               <label className="form-label">Password</label>
               <input
@@ -96,7 +89,6 @@ function Register() {
               />
             </div>
 
-            {/* Confirm Password Field */}
             <div className="mb-3">
               <label className="form-label">Confirm Password</label>
               <input
@@ -109,13 +101,11 @@ function Register() {
               />
             </div>
 
-            {/* Submit Button */}
             <button type="submit" className="btn btn-primary w-100" disabled={loading}>
               {loading ? "Registering..." : "Register"}
             </button>
           </form>
 
-          {/* Login Button Below Form */}
           <div className="text-center mt-3">
             <p>Already have an account?</p>
             <button onClick={() => navigate("/login")} className="btn btn-outline-primary w-100">

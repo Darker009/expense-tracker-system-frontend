@@ -1,90 +1,156 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Dashboard() {
-  const [userId, setUserId] = useState(""); // Manual user ID entry
-  const [savings, setSavings] = useState(0);
-  const [expenses, setExpenses] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState(null);
+  const [savings, setSavings] = useState(null);
+  const [detailedExpenses, setDetailedExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchUserData = async () => {
-    if (!userId) return;
-    setLoading(true);
-    setError("");
+  // Predefined expense categories
+  const expenseCategories = [
+    "RECHARGE",
+    "EMI",
+    "ELECTRICITY_BILL",
+    "FITNESS",
+    "CLOTHING",
+    "MEDICAL",
+    "FOOD",
+    "DONATION",
+  ];
 
-    try {
-      const response = await axios.get(`http://localhost:8080/api/users/${userId}`);
-      if (response.data.active) {
-        setSavings(response.data.savings || 0);
-        setExpenses(response.data.expenses || 0);
-      } else {
-        setError("User is deactivated. Access denied.");
-      }
-    } catch (err) {
-      setError("User not found.");
-    } finally {
-      setLoading(false);
+  const userId = localStorage.getItem("userId");
+
+  // Fetch user details, savings and detailed expenses
+  useEffect(() => {
+    if (!userId || userId === "undefined") {
+      navigate("/login");
+      return;
     }
-  };
+    const fetchData = async () => {
+      try {
+        // Fetch user details
+        const userResponse = await axios.get(`http://localhost:8080/api/users/${userId}`);
+        setUserDetails(userResponse.data);
+        // Fetch savings details
+        try {
+          const savingsResponse = await axios.get(`http://localhost:8080/api/savings/${userId}`);
+          setSavings(savingsResponse.data);
+        } catch (err) {
+          if (err.response && err.response.status === 404) {
+            setSavings(null);
+          } else {
+            setError("Error fetching savings details.");
+          }
+        }
+        // Fetch detailed expenses
+        try {
+          const expensesResponse = await axios.get(`http://localhost:8080/api/expenses/${userId}`);
+          setDetailedExpenses(expensesResponse.data);
+        } catch (err) {
+          console.error("Error fetching detailed expenses:", err);
+          setError("Error fetching expense details.");
+        }
+      } catch (err) {
+        setError("Error fetching user details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [navigate, userId]);
+
+  // Group expenses by category with default values for missing categories
+  const groupedExpenses = expenseCategories.reduce((acc, category) => {
+    acc[category] = {
+      total: 0,
+      description: "-",
+      date: "-",
+    };
+    return acc;
+  }, {});
+
+  detailedExpenses.forEach((expense) => {
+    const cat = expense.category;
+    if (groupedExpenses[cat] !== undefined) {
+      // Add the expense amount
+      groupedExpenses[cat].total += Number(expense.amount);
+      // Choose the latest expense for description and date
+      const currentDate = groupedExpenses[cat].date === "-" ? 0 : new Date(groupedExpenses[cat].date).getTime();
+      const expenseDate = expense.date ? new Date(expense.date).getTime() : 0;
+      if (expenseDate > currentDate) {
+        groupedExpenses[cat].description = expense.description || "-";
+        groupedExpenses[cat].date = expense.date ? new Date(expense.date).toLocaleDateString() : "-";
+      }
+    }
+  });
+
+  if (loading) {
+    return <div className="container text-center mt-5">Loading...</div>;
+  }
 
   return (
-    <div className="container d-flex flex-column justify-content-center align-items-center vh-100">
-      <div className="col-md-8">
-        <div className="card shadow-lg p-4 text-center">
-          <h2 className="mb-4">Dashboard</h2>
-          <p>Welcome to your Expense Tracker Dashboard.</p>
-
-          {/* User ID Input */}
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control text-center"
-              placeholder="Enter User ID"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-            />
-            <button className="btn btn-primary mt-2" onClick={fetchUserData} disabled={loading}>
-              {loading ? "Loading..." : "Fetch Data"}
-            </button>
-          </div>
-
-          {error && <p className="text-danger">{error}</p>}
-
-          {/* Savings & Expenses Display */}
-          {!error && userId && (
-            <div className="row mt-4">
-              <div className="col-md-6">
-                <div className="card text-white bg-primary mb-3 shadow">
-                  <div className="card-body">
-                    <h5 className="card-title">Total Savings</h5>
-                    <p className="card-text">₹ {savings}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="card text-white bg-danger mb-3 shadow">
-                  <div className="card-body">
-                    <h5 className="card-title">Total Expenses</h5>
-                    <p className="card-text">₹ {expenses}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-3">
-            <button className="btn btn-success me-2">Add Income</button>
-            <button className="btn btn-warning">Add Expense</button>
-          </div>
-
+    <div className="container-fluid vh-100 bg-light p-4 text-center">
+      <h1 className="text-primary fw-bold mb-5">Expense Tracker Dashboard</h1>
+      {userDetails && <h2>Welcome, {userDetails.name}</h2>}
+      
+      {savings ? (
+        <>
           <div className="mt-4">
-            <Link to="/profile" className="btn btn-info">
-              Go to Profile
-            </Link>
+            <h4>Total Balance: ₹ {savings.remainingBalance || 0}</h4>
           </div>
+          <div className="mt-4">
+            <h3>Expense Summary by Category</h3>
+            <table className="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Expense (₹)</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenseCategories.map((category) => (
+                  <tr key={category}>
+                    <td>{category.replace(/_/g, " ")}</td>
+                    <td>{groupedExpenses[category].total || 0}</td>
+                    <td>{groupedExpenses[category].description}</td>
+                    <td>{groupedExpenses[category].date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <div className="mt-4">
+          <h4>You do not have a savings account yet.</h4>
+          <button className="btn btn-primary" onClick={() => navigate("/savings")}>
+            Create Savings Account
+          </button>
         </div>
+      )}
+      
+      <div className="mt-4 d-flex justify-content-center gap-4">
+        <button className="btn btn-warning px-4 py-2" onClick={() => navigate("/expense")}>
+          Add Expense
+        </button>
+        <button className="btn btn-secondary px-4 py-2" onClick={() => navigate("/balance")}>
+          Balance
+        </button>
+        <button className="btn btn-secondary px-4 py-2" onClick={() => navigate("/report")}>
+          Report
+        </button>
+      </div>
+      
+      <div className="mt-4">
+        <Link to="/profile" className="btn btn-info px-4 py-2">
+          Go to Profile
+        </Link>
       </div>
     </div>
   );

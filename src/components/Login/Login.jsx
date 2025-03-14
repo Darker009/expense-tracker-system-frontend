@@ -14,10 +14,19 @@ function Login({ onLogin }) {
 
     try {
       const response = await axios.post("http://localhost:8080/api/users/login", { email, password });
+      console.log("Login response data:", response.data);
 
       if (response.status === 200) {
-        onLogin(response.data);
-        navigate("/dashboard");
+        const userData = response.data;
+        // Use the appropriate property for user ID
+        const userId = userData.userId || userData.id;
+        if (!userId) {
+          setError("User ID not found in login response.");
+          return;
+        }
+        localStorage.setItem("userId", userId);
+        onLogin(userData);
+        navigate("/dashboard");  // Now navigate to the dashboard
       }
     } catch (err) {
       setError("Invalid email or password. Please try again.");

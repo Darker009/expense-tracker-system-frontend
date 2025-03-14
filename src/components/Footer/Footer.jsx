@@ -1,9 +1,13 @@
-import React from 'react';
+import React from "react";
 
 function Footer() {
   return (
-    <footer className="bg-light text-center p-3 fixed-bottom">
-      <small>&copy; 2025 Expense Tracker. All rights reserved.</small>
+    <footer className="bg-dark text-white text-center p-3 mt-auto">
+      <div className="container">
+        <p>
+          Expense Tracker System &copy; {new Date().getFullYear()}. All rights reserved.
+        </p>
+      </div>
     </footer>
   );
 }

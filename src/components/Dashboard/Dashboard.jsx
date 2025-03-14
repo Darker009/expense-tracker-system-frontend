@@ -93,7 +93,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="container-fluid vh-100 bg-light p-4 text-center">
+    <div className="container-fluid vh-100 bg-light p-4 text-center mt-5 ">
       <h1 className="text-primary fw-bold mb-5">Expense Tracker Dashboard</h1>
       {userDetails && <h2>Welcome, {userDetails.name}</h2>}
       
@@ -147,11 +147,7 @@ function Dashboard() {
         </button>
       </div>
       
-      <div className="mt-4">
-        <Link to="/profile" className="btn btn-info px-4 py-2">
-          Go to Profile
-        </Link>
-      </div>
+    
     </div>
   );
 }

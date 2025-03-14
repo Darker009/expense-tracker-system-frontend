@@ -52,7 +52,6 @@ function EditProfile() {
           {error && <p className="text-danger text-center">{error}</p>}
           
           <form onSubmit={handleSubmit}>
-            {/* User Number */}
             <div className="mb-3">
               <label className="form-label fw-bold">User Number</label>
               <input
@@ -65,7 +64,6 @@ function EditProfile() {
               />
             </div>
 
-            {/* Name Field */}
             <div className="mb-3">
               <label className="form-label fw-bold">New Name</label>
               <input
@@ -78,7 +76,6 @@ function EditProfile() {
               />
             </div>
 
-            {/* Password Field */}
             <div className="mb-3">
               <label className="form-label fw-bold">New Password</label>
               <input
@@ -91,13 +88,11 @@ function EditProfile() {
               />
             </div>
 
-            {/* Save Button */}
             <button type="submit" className="btn btn-success w-100" disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </form>
 
-          {/* Cancel Button */}
           <button className="btn btn-secondary mt-3 w-100" onClick={() => navigate("/profile")}>
             Cancel
           </button>

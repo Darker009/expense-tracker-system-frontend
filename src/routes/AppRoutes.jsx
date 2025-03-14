@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
-import Footer from "../components/Footer/Footer"; // Import the Footer component
+import Footer from "../components/Footer/Footer";
 import Welcome from "../components/Welcome/Welcome";
 import Login from "../components/Login/Login";
 import Register from "../components/Register/Register";
@@ -34,6 +34,7 @@ function AppRoutes() {
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("userId", userData.userId);
   };
   
   const logout = () => {
@@ -56,7 +57,16 @@ function AppRoutes() {
             <Route path="/expense" element={<Expense />} />
             <Route path="/balance" element={<Balance />} />
             <Route path="/report" element={<Report />} />
-            <Route path="/profile" element={user ? <UserProfile onLogout={logout} /> : <Navigate to="/login" />} />
+            <Route
+              path="/profile"
+              element={
+                user ? (
+                  <UserProfile userNumber={user.userId} onLogout={logout} />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
           </Routes>
         </div>
         <Footer />

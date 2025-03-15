@@ -12,7 +12,6 @@ import Expense from "../components/Expense/Expense";
 import Balance from "../components/Balance/Balance";
 import Report from "../components/Report/Report";
 
-// Protected Route Component
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem("user");
   console.log("Checking user for protected route:", user); // Debugging

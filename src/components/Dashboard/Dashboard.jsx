@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // Import the centralized axios instance
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -33,11 +33,12 @@ function Dashboard() {
     const fetchData = async () => {
       try {
         // Fetch user details
-        const userResponse = await axios.get(`http://localhost:8080/api/users/${userId}`);
+        const userResponse = await api.get(`/users/${userId}`);
         setUserDetails(userResponse.data);
+
         // Fetch savings details
         try {
-          const savingsResponse = await axios.get(`http://localhost:8080/api/savings/${userId}`);
+          const savingsResponse = await api.get(`/savings/${userId}`);
           setSavings(savingsResponse.data);
         } catch (err) {
           if (err.response && err.response.status === 404) {
@@ -46,9 +47,10 @@ function Dashboard() {
             setError("Error fetching savings details.");
           }
         }
+
         // Fetch detailed expenses
         try {
-          const expensesResponse = await axios.get(`http://localhost:8080/api/expenses/${userId}`);
+          const expensesResponse = await api.get(`/expenses/${userId}`);
           setDetailedExpenses(expensesResponse.data);
         } catch (err) {
           console.error("Error fetching detailed expenses:", err);
@@ -79,7 +81,8 @@ function Dashboard() {
       // Add the expense amount
       groupedExpenses[cat].total += Number(expense.amount);
       // Choose the latest expense for description and date
-      const currentDate = groupedExpenses[cat].date === "-" ? 0 : new Date(groupedExpenses[cat].date).getTime();
+      const currentDate =
+        groupedExpenses[cat].date === "-" ? 0 : new Date(groupedExpenses[cat].date).getTime();
       const expenseDate = expense.date ? new Date(expense.date).getTime() : 0;
       if (expenseDate > currentDate) {
         groupedExpenses[cat].description = expense.description || "-";
@@ -93,7 +96,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="container-fluid vh-100 bg-light p-4 text-center mt-5 ">
+    <div className="container-fluid vh-100 bg-light p-4 text-center mt-5">
       <h1 className="text-primary fw-bold mb-5">Expense Tracker Dashboard</h1>
       {userDetails && <h2>Welcome, {userDetails.name}</h2>}
       
@@ -146,8 +149,6 @@ function Dashboard() {
           Report
         </button>
       </div>
-      
-    
     </div>
   );
 }

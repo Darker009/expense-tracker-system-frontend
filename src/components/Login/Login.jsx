@@ -1,35 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // Import the centralized axios instance
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:8080/api/users/login", { email, password });
+      const response = await api.post("/users/login", { email, password });
       console.log("Login response data:", response.data);
 
       if (response.status === 200) {
         const userData = response.data;
-        // Use the appropriate property for user ID
         const userId = userData.userId || userData.id;
+        
         if (!userId) {
           setError("User ID not found in login response.");
           return;
         }
+        
         localStorage.setItem("userId", userId);
         onLogin(userData);
-        navigate("/dashboard");  // Now navigate to the dashboard
+        navigate("/dashboard");
       }
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      console.error("Error during login:", err);
+      setError(err.response?.data?.message || "Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,6 +55,7 @@ function Login({ onLogin }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -60,17 +67,18 @@ function Login({ onLogin }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-100">
-              Login
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
           <div className="text-center mt-3">
             <p>Don't have an account?</p>
-            <button onClick={() => navigate("/register")} className="btn btn-outline-primary w-100">
+            <button onClick={() => navigate("/register")} className="btn btn-outline-primary w-100" disabled={loading}>
               Register
             </button>
           </div>

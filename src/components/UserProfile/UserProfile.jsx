@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api";
 import defaultProfileImg from "../../assets/profile.jpg";
 
 function UserProfile({ userNumber, onLogout }) {
@@ -13,7 +13,7 @@ function UserProfile({ userNumber, onLogout }) {
 
   useEffect(() => {
     if (!userNumber) return;
-    axios.get(`http://localhost:8080/api/users/${userNumber}`)
+    api.get(`/users/${userNumber}`)
       .then(response => {
         setUser(response.data);
         setUpdatedUser({ name: response.data.name, password: "" });
@@ -41,7 +41,7 @@ function UserProfile({ userNumber, onLogout }) {
       formData.append("profileImage", selectedImageFile);
     }
     
-    axios.put(`http://localhost:8080/api/users/${userNumber}`, formData, {
+    api.put(`/users/${userNumber}`, formData, {
       headers: { "Content-Type": "multipart/form-data" }
     })
       .then(response => {
@@ -53,7 +53,7 @@ function UserProfile({ userNumber, onLogout }) {
   };
 
   const handleDeactivate = () => {
-    axios.delete(`http://localhost:8080/api/users/${userNumber}/deactivate`)
+    api.delete(`/users/${userNumber}/deactivate`)
       .then(() => {
         alert("Account deactivated! Please log in again.");
         onLogout();
@@ -70,12 +70,13 @@ function UserProfile({ userNumber, onLogout }) {
           {user && (
             <div className="mb-3">
               <div className="d-flex flex-column align-items-center">
-                {/* Use profileImageUrl from backend */}
+                {/* Use profileImageUrl from backend if available */}
                 <img 
                   src={profileImage || user.profileImageUrl || defaultProfileImg} 
                   alt="User Avatar" 
                   className="rounded-circle mb-3 shadow" 
-                  width="120" height="120"
+                  width="120" 
+                  height="120"
                 />
                 {editMode && (
                   <input 

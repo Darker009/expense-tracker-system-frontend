@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // Import the centralized axios instance
 
 function Balance() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ function Balance() {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/savings/${userId}`);
+        const response = await api.get(`/savings/${userId}`);
         setSavings(response.data);
       } catch (err) {
         console.error("Error fetching balance:", err);
@@ -37,7 +37,7 @@ function Balance() {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/expenses/${userId}`);
+        const response = await api.get(`/expenses/${userId}`);
         setExpenses(response.data);
       } catch (err) {
         console.error("Error fetching expenses:", err);
@@ -52,9 +52,9 @@ function Balance() {
   // Delete an expense by ID
   const handleDeleteExpense = async (expenseId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/expenses/${expenseId}`);
-      // Refresh expenses list
-      const response = await axios.get(`http://localhost:8080/api/expenses/${userId}`);
+      await api.delete(`/expenses/${expenseId}`);
+      // Refresh expenses list after deletion
+      const response = await api.get(`/expenses/${userId}`);
       setExpenses(response.data);
     } catch (err) {
       console.error("Error deleting expense:", err);
@@ -65,16 +65,14 @@ function Balance() {
   // Filter expenses by category and/or date range
   const handleFilterExpenses = async () => {
     try {
-      let url = `http://localhost:8080/api/expenses/${userId}`;
-      // If category filter is provided, use the category endpoint
+      let url = `/expenses/${userId}`;
       if (categoryFilter) {
-        url = `http://localhost:8080/api/expenses/${userId}/category/${categoryFilter}`;
+        url = `/expenses/${userId}/category/${categoryFilter}`;
       }
-      // If both start and end dates are provided, use the date range endpoint
       if (startDate && endDate) {
-        url = `http://localhost:8080/api/expenses/${userId}/date?startDate=${startDate}&endDate=${endDate}`;
+        url = `/expenses/${userId}/date?startDate=${startDate}&endDate=${endDate}`;
       }
-      const response = await axios.get(url);
+      const response = await api.get(url);
       setExpenses(response.data);
     } catch (err) {
       console.error("Error filtering expenses:", err);
@@ -88,7 +86,7 @@ function Balance() {
     setStartDate("");
     setEndDate("");
     try {
-      const response = await axios.get(`http://localhost:8080/api/expenses/${userId}`);
+      const response = await api.get(`/expenses/${userId}`);
       setExpenses(response.data);
     } catch (err) {
       console.error("Error resetting filters:", err);
@@ -111,7 +109,6 @@ function Balance() {
         <p>Loading balance...</p>
       ) : savings ? (
         <div className="text-center mb-4">
-          {/* Display remaining balance as total balance */}
           <h4>Total Balance: ₹ {savings.remainingBalance || 0}</h4>
         </div>
       ) : (

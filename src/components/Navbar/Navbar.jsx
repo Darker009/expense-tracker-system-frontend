@@ -1,50 +1,48 @@
 import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ user, logout }) {
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");
 
-  // Function to collapse the navbar if it's open
+  // Function to collapse navbar
   const collapseNavbar = () => {
     const navbarCollapse = document.getElementById("navbarNav");
-    if (navbarCollapse && navbarCollapse.classList.contains("show")) {
-      new window.bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
+    if (navbarCollapse?.classList.contains("show")) {
+      new window.bootstrap.Collapse(navbarCollapse).hide();
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userId");
+    logout();
     collapseNavbar();
     navigate("/login");
   };
 
-  // Collapse the navbar when clicking outside of it
+  // Collapse navbar when clicking outside
   useEffect(() => {
-    const handleDocumentClick = (event) => {
+    const handleClickOutside = (event) => {
       const navbarCollapse = document.getElementById("navbarNav");
-      // Check if the navbar is open and the click target is not inside it
-      if (navbarCollapse && navbarCollapse.classList.contains("show")) {
-        if (!navbarCollapse.contains(event.target)) {
-          new window.bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
-        }
+      if (navbarCollapse?.classList.contains("show") && !navbarCollapse.contains(event.target)) {
+        new window.bootstrap.Collapse(navbarCollapse).hide();
       }
     };
 
-    document.addEventListener("click", handleDocumentClick);
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
-      <div className="container-fluid">
-        {/* Navbar Brand */}
-        <Link className="navbar-brand fw-bold" to="/" onClick={collapseNavbar}>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+      <div className="container">
+        <button
+          className="navbar-brand btn btn-link text-white fw-bold"
+          onClick={() => {
+            collapseNavbar();
+            navigate("/");
+          }}
+        >
           Expense Tracker System
-        </Link>
-        {/* Hamburger Menu for Mobile */}
+        </button>
         <button
           className="navbar-toggler"
           type="button"
@@ -54,36 +52,53 @@ function Navbar() {
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon" />
         </button>
-        {/* Navbar Links */}
         <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
           <ul className="navbar-nav align-items-center">
-            {userId && (
-              <li className="nav-item me-3">
-                <Link className="nav-link" to="/dashboard" onClick={collapseNavbar}>
-                  Dashboard
-                </Link>
-              </li>
-            )}
-            {userId && (
-              <li className="nav-item me-3">
-                <Link className="nav-link" to="/profile" onClick={collapseNavbar}>
-                  Profile
-                </Link>
-              </li>
-            )}
-            <li className="nav-item">
-              {userId ? (
-                <button className="btn btn-danger" onClick={handleLogout}>
-                  Logout
-                </button>
-              ) : (
-                <Link className="btn btn-primary" to="/login" onClick={collapseNavbar}>
+            {user ? (
+              <>
+                <li className="nav-item">
+                  <button
+                    className="nav-link btn btn-link text-white"
+                    onClick={() => {
+                      collapseNavbar();
+                      navigate("/dashboard");
+                    }}
+                  >
+                    Dashboard
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className="nav-link btn btn-link text-white"
+                    onClick={() => {
+                      collapseNavbar();
+                      navigate("/profile");
+                    }}
+                  >
+                    Profile
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button className="btn btn-outline-light" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <button
+                  className="btn btn-outline-light"
+                  onClick={() => {
+                    collapseNavbar();
+                    navigate("/login");
+                  }}
+                >
                   Login
-                </Link>
-              )}
-            </li>
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </div>

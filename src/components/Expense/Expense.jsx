@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../api"; // Import the centralized API instance
 
 function Expense() {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ function Expense() {
     }
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:8080/api/expenses/${userId}`);
+      const res = await api.get(`/expenses/${userId}`);
       setExpenses(res.data);
       setLoading(false);
     } catch (err) {
@@ -60,7 +60,7 @@ function Expense() {
       return;
     }
     try {
-      await axios.post(`http://localhost:8080/api/expenses/${userId}`, formData);
+      await api.post(`/expenses/${userId}`, formData);
       // Refresh the list after adding expense
       fetchExpenses();
       // Clear form fields
@@ -73,7 +73,7 @@ function Expense() {
 
   const handleDelete = async (expenseId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/expenses/${expenseId}`);
+      await api.delete(`/expenses/${expenseId}`);
       fetchExpenses();
     } catch (err) {
       console.error("Error deleting expense:", err);

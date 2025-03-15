@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // Import the centralized API instance
 
 function Savings() {
   const [formData, setFormData] = useState({
@@ -37,11 +37,11 @@ function Savings() {
     }
 
     try {
-      await axios.post(
-        `http://localhost:8080/api/savings/register/${userId}`,
+      await api.post(
+        `/savings/register/${userId}`,
         {
           ...formData,
-          totalBalance: Number(formData.totalBalance), // ensure numeric conversion if needed
+          totalBalance: Number(formData.totalBalance), // Ensure numeric conversion if needed
         },
         {
           headers: {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // Import centralized API instance
 
 function EditProfile() {
   const navigate = useNavigate();
@@ -33,11 +33,11 @@ function EditProfile() {
 
     try {
       setLoading(true);
-      await axios.put(`http://localhost:8080/api/users/${userNumber}`, formData);
+      await api.put(`/users/${userNumber}`, formData);
       alert("Profile updated successfully!");
       navigate("/profile");
-    } catch (error) {
-      console.error("Error updating profile:", error);
+    } catch (err) {
+      console.error("Error updating profile:", err);
       setError("Failed to update profile. Try again.");
     } finally {
       setLoading(false);

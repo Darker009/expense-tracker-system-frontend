@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // Import the centralized API instance
 
 function Report() {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ function Report() {
 
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8080/api/reports/${userId}`, {
+      const response = await api.get(`/reports/${userId}`, {
         params: { month },
       });
       setReport(response.data);
